@@ -7,12 +7,12 @@ var isWindows = process.platform == 'win32';
 var lineBreak = isWindows ? /\r\n/g : /\n/g;
 
 var binaryContext = function(options, context) {
+  if (isWindows)
+    return {};
+
   context.topic = function() {
     // We add __DIRECT__=1 to force binary into 'non-piped' mode
-    if (isWindows)
-      exec("set __DIRECT__=1 & node .\\bin\\cleancss " + options, this.callback);
-    else
-      exec("__DIRECT__=1 ./bin/cleancss " + options, this.callback);
+    exec("__DIRECT__=1 ./bin/cleancss " + options, this.callback);
   };
   return context;
 };
