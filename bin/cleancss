@@ -1,10 +1,20 @@
 #!/usr/bin/env node
 
 var util = require("util");
-  fs = require('fs'),
-  path = require('path'),
-  argv = require('optimist').argv,
-  CleanCSS = require('../index');
+var fs = require('fs');
+var path = require('path');
+var CleanCSS = require('../index');
+
+var commands = require('commander');
+
+commands
+  .option('-v, --version', 'Print current version')
+  .option('-e, --empty, --remove-empty', 'Remove empty declarations (e.g. a{})')
+  .option('-b, --keepbreaks, --keeplinebreaks', 'Keep line breaks')
+  .option('--s0', 'Remove all special comments (i.e. /*! special comment */)')
+  .option('--s1', 'Remove all special comments but the first one')
+  .option('-o [output-file]', 'Use [output-file] as output instead of stdout')
+  .parse(process.argv);
 
 var options = {
   source: null,
@@ -13,34 +23,24 @@ var options = {
 var cleanOptions = {};
 var fromStdin = !process.env['__DIRECT__'] && process.stdin.readable;
 
-if (argv.o)
-  options.target = argv.o;
-if (argv._)
-  options.source = argv._[0];
-if (argv.e || argv.empty || argv.removeempty)
-  cleanOptions.removeEmpty = true;
-if (argv.b || argv.keepbreaks || argv.keeplinebreaks)
-  cleanOptions.keepBreaks = true;
-if (argv.s1)
-  cleanOptions.keepSpecialComments = 1;
-if (argv.s0)
-  cleanOptions.keepSpecialComments = 0;
-
-if (argv.v) {
+if (commands.version) {
   var packageConfig = fs.readFileSync(path.join(path.dirname(fs.realpathSync(process.argv[1])), '../package.json'));
   util.puts(JSON.parse(packageConfig).version);
   return 0;
 }
 
-if (argv.h || argv.help || (!fromStdin && argv._.length == 0)) {
-  util.puts("usage: cleancss [options] -o <output-file> <input-file>\n");
-  util.puts("options:");
-  util.puts("  -e\tRemove empty declarations (e.g. a{})");
-  util.puts("  -b\tKeep line breaks");
-  util.puts("  --s0\tRemove all special comments (i.e. /*! special comment */)");
-  util.puts("  --s1\tRemove all special comments but the first one");
-  return 0;
-}
+if (commands.o)
+  options.target = commands.o;
+if (commands._)
+  options.source = commands._[0];
+if (commands.removeempty)
+  cleanOptions.removeEmpty = true;
+if (commands.keeplinebreaks)
+  cleanOptions.keepBreaks = true;
+if (commands.s1)
+  cleanOptions.keepSpecialComments = 1;
+if (commands.s0)
+  cleanOptions.keepSpecialComments = 0;
 
 if (options.source) {
   fs.readFile(options.source, 'utf8', function(error, text) {
