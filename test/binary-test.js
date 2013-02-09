@@ -30,12 +30,12 @@ var pipedContext = function(css, options, context) {
 exports.commandsSuite = vows.describe('binary commands').addBatch({
   'no options': binaryContext('', {
     'should output help': function(stdout) {
-      assert.equal(/usage:/.test(stdout), true);
+      assert.equal(/Usage:/.test(stdout), true);
     }
   }),
   'help': binaryContext('-h', {
     'should output help': function(error, stdout) {
-      assert.equal(/usage:/.test(stdout), true);
+      assert.equal(/Usage:/.test(stdout), true);
     }
   }),
   'version': binaryContext('-v', {

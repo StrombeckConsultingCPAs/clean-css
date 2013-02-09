@@ -7,13 +7,17 @@ var CleanCSS = require('../index');
 
 var commands = require('commander');
 
+var packageConfig = fs.readFileSync(path.join(path.dirname(fs.realpathSync(process.argv[1])), '../package.json'));
+var buildVersion = JSON.parse(packageConfig).version;
+
+// Specify commander options to parse command line params correctly
 commands
-  .option('-v, --version', 'Print current version')
-  .option('-e, --empty, --remove-empty', 'Remove empty declarations (e.g. a{})')
-  .option('-b, --keepbreaks, --keeplinebreaks', 'Keep line breaks')
+  .version(buildVersion, '-v, --version')
+  .option('-e, --remove-empty', 'Remove empty declarations (e.g. a{})')
+  .option('-b, --keep-line-breaks', 'Keep line breaks')
   .option('--s0', 'Remove all special comments (i.e. /*! special comment */)')
   .option('--s1', 'Remove all special comments but the first one')
-  .option('-o [output-file]', 'Use [output-file] as output instead of stdout')
+  .option('-o, --output [output-file]', 'Use [output-file] as output instead of stdout')
   .parse(process.argv);
 
 var options = {
@@ -21,27 +25,29 @@ var options = {
   target: null
 };
 var cleanOptions = {};
-var fromStdin = !process.env['__DIRECT__'] && process.stdin.readable;
+var fromStdin = !process.env['__DIRECT__'] && process.stdin.writable;
 
-if (commands.version) {
-  var packageConfig = fs.readFileSync(path.join(path.dirname(fs.realpathSync(process.argv[1])), '../package.json'));
-  util.puts(JSON.parse(packageConfig).version);
+// If no sensible data passed in just print help and exit
+if (!fromStdin && commands.args.length == 0) {
+  commands.outputHelp();
   return 0;
 }
 
-if (commands.o)
-  options.target = commands.o;
-if (commands._)
-  options.source = commands._[0];
-if (commands.removeempty)
+// Now coerce commands into CleanCSS configuration...
+if (commands.output)
+  options.target = commands.output;
+if (commands.args.length > 0)
+  options.source = commands.args[0];
+if (commands.removeEmpty)
   cleanOptions.removeEmpty = true;
-if (commands.keeplinebreaks)
+if (commands.keepLineBreaks)
   cleanOptions.keepBreaks = true;
 if (commands.s1)
   cleanOptions.keepSpecialComments = 1;
 if (commands.s0)
   cleanOptions.keepSpecialComments = 0;
 
+// ... and do the magic!
 if (options.source) {
   fs.readFile(options.source, 'utf8', function(error, text) {
     if (error) throw error;
