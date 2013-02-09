@@ -8,7 +8,7 @@ var lineBreak = isWindows ? /\r\n/g : /\n/g;
 
 var binaryContext = function(options, context) {
   context.topic = function() {
-    // We add __DIRECT__=1 to switch binary into 'non-piped' mode
+    // We add __DIRECT__=1 to force binary into 'non-piped' mode
     if (isWindows)
       exec("set __DIRECT__=1 & node .\\bin\\cleancss " + options, this.callback);
     else
