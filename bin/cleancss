@@ -13,6 +13,7 @@ var buildVersion = JSON.parse(packageConfig).version;
 // Specify commander options to parse command line params correctly
 commands
   .version(buildVersion, '-v, --version')
+  .usage('[options] <source-file>')
   .option('-e, --remove-empty', 'Remove empty declarations (e.g. a{})')
   .option('-b, --keep-line-breaks', 'Keep line breaks')
   .option('--s0', 'Remove all special comments (i.e. /*! special comment */)')
